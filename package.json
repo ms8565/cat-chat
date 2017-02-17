@@ -1,0 +1,21 @@
+{
+  "name": "chatserver",
+  "version": "1.0.0",
+  "description": "websockets chat server",
+  "main": "index.js",
+  "dependencies": {
+    "socket.io": "^1.4.8"
+  },
+  "devDependencies": {
+    "eslint": "^3.4.0",
+    "eslint-config-airbnb": "^11.0.0",
+    "eslint-plugin-import": "^1.14.0"
+  },
+  "scripts": {
+    "start": "node ./src/server.js",
+    "pretest": "eslint ./src --fix",
+    "test": "echo test complete"
+  },
+  "author": "madison",
+  "license": "ISC"
+}
