@@ -1,10 +1,7 @@
-'use strict';
-
-const http = require('http');
-const fs = require('fs');
-const socketio = require('socket.io');
 
 const users = {};
+
+let io;
 
 const catPhrases = [
   'Meow meow meow meow meow meow.',
@@ -34,21 +31,6 @@ const catPhrases = [
   'MeeeeOW???',
 ];
 
-const port = process.env.PORT || process.env.NODE_PORT || 3000;
-
-const index = fs.readFileSync(`${__dirname}/../client/client.html`);
-
-const onRequest = (request, response) => {
-  response.writeHead(200, { 'Content-Type': 'text/html' });
-  response.write(index);
-  response.end();
-};
-
-const app = http.createServer(onRequest).listen(port);
-
-console.log(`Listening on 127.0.0.1: ${port}`);
-
-const io = socketio(app);
 const serverAvatar = 'https://people.rit.edu/ms8565/realtime/images/serverCat.jpg';
 
 const sendMsg = (message, name, color, avatar, catMsg, timestamp) => {
@@ -101,7 +83,8 @@ const onMsg = (sock) => {
 
   socket.on('msgToServer', (data) => {
     const catPhrase = catPhrases[Math.floor(Math.random() * catPhrases.length)];
-    io.sockets.in('room1').emit('msg', sendMsg(data.msg, socket.name, socket.color, socket.avatar, catPhrase, date));
+    const message = sendMsg(data.msg, socket.name, socket.color, socket.avatar, catPhrase, date);
+    io.sockets.in('room1').emit('msg', message);
   });
 };
 
@@ -143,14 +126,19 @@ const onDisconnect = (sock) => {
   });
 };
 
-io.sockets.on('connection', (socket) => {
-  console.log('started');
+const setupSockets = (ioServer) => {
+  // set our io server instance
+  io = ioServer;
 
-  onJoined(socket);
-  onMsg(socket);
-  onChangeAttributes(socket);
-  onTime(socket);
-  onDisconnect(socket);
-});
+  io.sockets.on('connection', (socket) => {
+    console.log('started');
 
-console.log('Websocket server started');
+    onJoined(socket);
+    onMsg(socket);
+    onChangeAttributes(socket);
+    onTime(socket);
+    onDisconnect(socket);
+  });
+};
+
+module.exports.setupSockets = setupSockets;
